@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable = no">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>PWA</title>
+  <link rel="stylesheet" href="main.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+
+<body>
+  <p>Hello PWA</p>
+  <p class="test"></p>
+
+  <script>
+    let test = document.querySelector('.test');
+    let url = 'http://cs.yujiaojiaoyu.com/insurance/getInsuranceIndex.htm';
+    if ('caches' in window) {
+      /*
+       * Check if the service worker has already cached this city's weather
+       * data. If the service worker has the data, then display the cached
+       * data while the app fetches the latest data.
+       */
+      caches.match(url).then(function (response) {
+        if (response) {
+          response.json().then(function updateFromCache(json) {
+            test.innerHTML = json.message
+          });
+        }
+      });
+    }
+    fetch(url).then(res => res.json()).then(res => {
+      test.innerHTML = res.message;
+    })
+    window.onload = (function (doc, win) {
+      let docEl = doc.documentElement,
+        getRem = function () {
+          let clientWidth = docEl.clientWidth;
+          if (!clientWidth) {
+            return
+          } else {
+            docEl.style.fontSize = clientWidth / 3.75 + 'px'
+          }
+        }
+      if (!doc.addEventListener) {
+        return
+      } else {
+        getRem()
+      }
+      win.addEventListener('resize', getRem, false);
+      doc.addEventListener('ready', getRem, false)
+    })(document, window)
+    if (navigator.serviceWorker != null) {
+      navigator.serviceWorker.register('./sw.js').then(function (registration) {
+        console.log(registration)
+      })
+    }
+  </script>
+</body>
+
+</html>
